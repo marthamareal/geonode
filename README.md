@@ -1,3 +1,7 @@
+Deprecated
+==========
+**WARNING**: This branch is **deprecated**. GeoNode 3.1 development/release train continues on branch 3.1.x
+
 ![GeoNode](https://raw.githubusercontent.com/GeoNode/documentation/master/about/img/geonode-logo_for_readme.gif "GeoNode")
 ![OSGeo Project](https://www.osgeo.cn/qgis/_static/images/osgeoproject.png)
 
