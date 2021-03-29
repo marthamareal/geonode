@@ -391,27 +391,34 @@ class PermissionLevelMixin(object):
                 if self.polymorphic_ctype.name == 'layer':
                     sync_geofence_with_guardian(self.layer, VIEW_PERMISSIONS)
 
+    def get_object_perms(self):
+        ctype = ContentType.objects.get_for_model(self)
+        PERMISSIONS_TO_FETCH = VIEW_PERMISSIONS + ADMIN_PERMISSIONS + LAYER_ADMIN_PERMISSIONS
+
+        perms = Permission.objects.filter(
+            codename__in=PERMISSIONS_TO_FETCH,
+            content_type_id=ctype.id
+            ).values('codename')
+        return [perm['codename'] for perm in perms]
+
     def get_user_perms(self, user):
         """
         Returns a list of permissions a user has on a given resource
         """
-        ctype = ContentType.objects.get_for_model(self)
-        PERMISSIONS_TO_FETCH = VIEW_PERMISSIONS + ADMIN_PERMISSIONS + LAYER_ADMIN_PERMISSIONS
-
-        resource_perms = Permission.objects.filter(
-            codename__in=PERMISSIONS_TO_FETCH,
-            content_type_id=ctype.id
-            ).values('codename')
-
+        resource = self.get_self_resource()
+        base_resource_perms = resource.get_object_perms()
+        resource_perms = self.get_object_perms()
         user_model = get_user_obj_perms_model(self)
+        ctype = ContentType.objects.get_for_model(self)
         user_resource_perms = user_model.objects.filter(
             object_pk=self.pk,
             content_type_id=ctype.id,
             user_id=user.id,
             permission__codename__in=resource_perms
             ).values('permission__codename')
+        user_resource_perms = [perm['permission__codename'] for perm in user_resource_perms]
 
-        return user_resource_perms
+        return base_resource_perms + user_resource_perms
 
     def user_can(self, user, permission):
         """
