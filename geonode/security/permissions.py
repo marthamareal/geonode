@@ -1,6 +1,8 @@
 # Permissions mapping
 PERMISSIONS = {
     'add_resourcebase': 'add_resource',
+    'approve_resourcebase': 'approve_resource',
+    'publish_resorcebase': 'publish_resorce',
 }
 
 # The following permissions will be filtered out when READ_ONLY mode is active
