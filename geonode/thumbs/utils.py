@@ -212,6 +212,13 @@ def get_map(
             headers["Authorization"] = f"Berarer {additional_kwargs['access_token']}"
 
     wms = WebMapService(f"{thumbnail_url}{wms_endpoint}", version=wms_version, headers=headers)
+    logger.error(f"LOGGING GEOSERVER BASE URL:  {thumbnail_url}{wms_endpoint}")
+
+    try:
+        _base_url = next((m.get('url') for m in wms.getOperationByName('GetMap').methods if m.get('type').lower() == 'get'))
+        logger.error(f"BASE URL as in WMS:  {_base_url}")
+    except StopIteration:
+        logger.error("OUR LOGGER TRY FAILED")
 
     image = None
     for retry in range(max_retries):
