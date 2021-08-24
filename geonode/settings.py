@@ -219,6 +219,7 @@ _DEFAULT_LANGUAGES = """(
     ('zh-cn', '中文'),
     ('ja', '日本語'),
     ('ko', '한국어'),
+    ('sk', 'Slovensky'),
 )"""
 
 LANGUAGES = ast.literal_eval(os.getenv('LANGUAGES', _DEFAULT_LANGUAGES))
@@ -1435,7 +1436,6 @@ if GEONODE_CLIENT_LAYER_PREVIEW_LIBRARY == 'mapstore':
         INSTALLED_APPS += (
             'mapstore2_adapter',
             'mapstore2_adapter.geoapps',
-            'mapstore2_adapter.geoapps.geostories',
             'geonode_mapstore_client',)
 
     def get_geonode_catalogue_service():
