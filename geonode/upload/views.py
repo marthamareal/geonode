@@ -771,8 +771,8 @@ def delete(req, id):
     ))
 
 
-def response_content_type(request):
-    if "application/json" in request.META['HTTP_ACCEPT']:
-        return "application/json"
-    else:
-        return "text/plain"
+# def response_content_type(request):
+#     if "application/json" in request.META['HTTP_ACCEPT']:
+#         return "application/json"
+#     else:
+#         return "text/plain"

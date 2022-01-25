@@ -271,20 +271,20 @@ class DatasetsTest(GeoNodeBaseTestSupport):
         for coord, check in zip(projected_bbox, solution):
             self.assertAlmostEqual(coord, check, places=3)
 
-    def test_dataset_attributes_feature_catalogue(self):
-        """ Test layer feature catalogue functionality
-        """
-        self.assertTrue(self.client.login(username='admin', password='admin'))
-        # test a non-existing layer
-        url = reverse('dataset_feature_catalogue', args=('bad_dataset',))
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 404)
+    # def test_dataset_attributes_feature_catalogue(self):
+    #     """ Test layer feature catalogue functionality
+    #     """
+    #     self.assertTrue(self.client.login(username='admin', password='admin'))
+    #     # test a non-existing layer
+    #     url = reverse('dataset_feature_catalogue', args=('bad_dataset',))
+    #     response = self.client.get(url)
+    #     self.assertEqual(response.status_code, 404)
 
-        # Get the layer to work with
-        layer = Dataset.objects.all()[3]
-        url = reverse('dataset_feature_catalogue', args=(layer.alternate,))
-        response = self.client.get(url)
-        self.assertNotEqual(response.status_code, 404)
+    #     # Get the layer to work with
+    #     layer = Dataset.objects.all()[3]
+    #     url = reverse('dataset_feature_catalogue', args=(layer.alternate,))
+    #     response = self.client.get(url)
+    #     self.assertNotEqual(response.status_code, 404)
 
     def test_dataset_attribute_config(self):
         lyr = Dataset.objects.all().first()

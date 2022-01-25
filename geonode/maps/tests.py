@@ -170,50 +170,50 @@ community."
                 "view_resourcebase"]},
         "groups": {}}
 
-    def test_map_to_wmc(self):
-        """ /maps/1/wmc -> Test map WMC export
-            Make some assertions about the data structure produced
-            for serialization to a Web Map Context Document
-        """
+    # def test_map_to_wmc(self):
+    #     """ /maps/1/wmc -> Test map WMC export
+    #         Make some assertions about the data structure produced
+    #         for serialization to a Web Map Context Document
+    #     """
 
-        map_obj = Map.objects.all().first()
-        map_obj.set_default_permissions()
-        response = self.client.get(reverse('map_wmc', args=(map_obj.id,)))
-        self.assertEqual(response.status_code, 200)
+    #     map_obj = Map.objects.all().first()
+    #     map_obj.set_default_permissions()
+    #     response = self.client.get(reverse('map_wmc', args=(map_obj.id,)))
+    #     self.assertEqual(response.status_code, 200)
 
-        # check specific XPaths
-        wmc = dlxml.fromstring(response.content)
+    #     # check specific XPaths
+    #     wmc = dlxml.fromstring(response.content)
 
-        ns = '{http://www.opengis.net/context}'
-        title = f'{ns}General/{ns}Title'
-        abstract = f'{ns}General/{ns}Abstract'
+    #     ns = '{http://www.opengis.net/context}'
+    #     title = f'{ns}General/{ns}Title'
+    #     abstract = f'{ns}General/{ns}Abstract'
 
-        self.assertIsNotNone(wmc.attrib.get('id'))
-        self.assertEqual(wmc.find(title).text, 'GeoNode Default Map')
-        self.assertEqual(
-            wmc.find(abstract).text,
-            'GeoNode default map abstract')
+    #     self.assertIsNotNone(wmc.attrib.get('id'))
+    #     self.assertEqual(wmc.find(title).text, 'GeoNode Default Map')
+    #     self.assertEqual(
+    #         wmc.find(abstract).text,
+    #         'GeoNode default map abstract')
 
-    @patch('geonode.thumbs.thumbnails.create_thumbnail')
-    def test_describe_map(self, thumbnail_mock):
-        map_obj = Map.objects.all().first()
-        map_obj.set_default_permissions()
-        response = self.client.get(reverse('map_metadata_detail', args=(map_obj.id,)))
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Approved", count=1, status_code=200, msg_prefix='', html=False)
-        self.assertContains(response, "Published", count=1, status_code=200, msg_prefix='', html=False)
-        self.assertContains(response, "Featured", count=1, status_code=200, msg_prefix='', html=False)
-        self.assertContains(response, "<dt>Group</dt>", count=0, status_code=200, msg_prefix='', html=False)
+    # @patch('geonode.thumbs.thumbnails.create_thumbnail')
+    # def test_describe_map(self, thumbnail_mock):
+    #     map_obj = Map.objects.all().first()
+    #     map_obj.set_default_permissions()
+    #     response = self.client.get(reverse('map_metadata_detail', args=(map_obj.id,)))
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertContains(response, "Approved", count=1, status_code=200, msg_prefix='', html=False)
+    #     self.assertContains(response, "Published", count=1, status_code=200, msg_prefix='', html=False)
+    #     self.assertContains(response, "Featured", count=1, status_code=200, msg_prefix='', html=False)
+    #     self.assertContains(response, "<dt>Group</dt>", count=0, status_code=200, msg_prefix='', html=False)
 
-        # ... now assigning a Group to the map
-        group = Group.objects.first()
-        map_obj.group = group
-        map_obj.save()
-        response = self.client.get(reverse('map_metadata_detail', args=(map_obj.id,)))
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "<dt>Group</dt>", count=1, status_code=200, msg_prefix='', html=False)
-        map_obj.group = None
-        map_obj.save()
+    #     # ... now assigning a Group to the map
+    #     group = Group.objects.first()
+    #     map_obj.group = group
+    #     map_obj.save()
+    #     response = self.client.get(reverse('map_metadata_detail', args=(map_obj.id,)))
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertContains(response, "<dt>Group</dt>", count=1, status_code=200, msg_prefix='', html=False)
+    #     map_obj.group = None
+    #     map_obj.save()
 
     def test_ajax_map_permissions(self):
         """Verify that the ajax_dataset_permissions view is behaving as expected

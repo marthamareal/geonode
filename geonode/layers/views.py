@@ -111,17 +111,6 @@ _PERMISSION_MSG_METADATA = _("You are not permitted to modify this dataset's met
 _PERMISSION_MSG_VIEW = _("You are not permitted to view this dataset")
 
 
-def log_snippet(log_file):
-    if not log_file or not os.path.isfile(log_file):
-        return f"No log file at {log_file}"
-
-    with open(log_file) as f:
-        f.seek(0, 2)  # Seek @ EOF
-        fsize = f.tell()  # Get Size
-        f.seek(max(fsize - 10024, 0), 0)  # Set pos @ last n chars
-        return f.read()
-
-
 def _resolve_dataset(request, alternate, permission='base.view_resourcebase', msg=_PERMISSION_MSG_GENERIC, **kwargs):
     """
     Resolve the layer by the provided typename (which may include service name) and check the optional permission.
@@ -412,49 +401,49 @@ def load_dataset_data(request, template='datasets/dataset_detail.html'):
                         content_type="application/json")
 
 
-def dataset_feature_catalogue(
-        request,
-        layername,
-        template='../../catalogue/templates/catalogue/feature_catalogue.xml'):
-    try:
-        layer = _resolve_dataset(request, layername)
-    except PermissionDenied:
-        return HttpResponse(_("Not allowed"), status=403)
-    except Exception:
-        raise Http404(_("Not found"))
-    if not layer:
-        raise Http404(_("Not found"))
+# def dataset_feature_catalogue(
+#         request,
+#         layername,
+#         template='../../catalogue/templates/catalogue/feature_catalogue.xml'):
+#     try:
+#         layer = _resolve_dataset(request, layername)
+#     except PermissionDenied:
+#         return HttpResponse(_("Not allowed"), status=403)
+#     except Exception:
+#         raise Http404(_("Not found"))
+#     if not layer:
+#         raise Http404(_("Not found"))
 
-    if layer.subtype != 'vector':
-        out = {
-            'success': False,
-            'errors': 'layer is not a feature type'
-        }
-        return HttpResponse(
-            json.dumps(out),
-            content_type='application/json',
-            status=400)
+#     if layer.subtype != 'vector':
+#         out = {
+#             'success': False,
+#             'errors': 'layer is not a feature type'
+#         }
+#         return HttpResponse(
+#             json.dumps(out),
+#             content_type='application/json',
+#             status=400)
 
-    attributes = []
+#     attributes = []
 
-    for attrset in layer.attribute_set.order_by('display_order'):
-        attr = {
-            'name': attrset.attribute,
-            'type': attrset.attribute_type
-        }
-        attributes.append(attr)
+#     for attrset in layer.attribute_set.order_by('display_order'):
+#         attr = {
+#             'name': attrset.attribute,
+#             'type': attrset.attribute_type
+#         }
+#         attributes.append(attr)
 
-    context_dict = {
-        'dataset': layer,
-        'attributes': attributes,
-        'metadata': settings.PYCSW['CONFIGURATION']['metadata:main']
-    }
-    register_event(request, 'view', layer)
-    return render(
-        request,
-        template,
-        context=context_dict,
-        content_type='application/xml')
+#     context_dict = {
+#         'dataset': layer,
+#         'attributes': attributes,
+#         'metadata': settings.PYCSW['CONFIGURATION']['metadata:main']
+#     }
+#     register_event(request, 'view', layer)
+#     return render(
+#         request,
+#         template,
+#         context=context_dict,
+#         content_type='application/xml')
 
 
 @login_required

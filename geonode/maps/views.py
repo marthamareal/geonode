@@ -338,27 +338,27 @@ def map_embed(
 # NEW MAPS #
 
 
-def clean_config(conf):
-    if isinstance(conf, str):
-        config = json.loads(conf)
-        config_extras = [
-            "tools",
-            "rest",
-            "homeUrl",
-            "localGeoServerBaseUrl",
-            "localCSWBaseUrl",
-            "csrfToken",
-            "db_datastore",
-            "authorizedRoles",
-        ]
-        for config_item in config_extras:
-            if config_item in config:
-                del config[config_item]
-            if config_item in config["map"]:
-                del config["map"][config_item]
-        return json.dumps(config)
-    else:
-        return conf
+# def clean_config(conf):
+#     if isinstance(conf, str):
+#         config = json.loads(conf)
+#         config_extras = [
+#             "tools",
+#             "rest",
+#             "homeUrl",
+#             "localGeoServerBaseUrl",
+#             "localCSWBaseUrl",
+#             "csrfToken",
+#             "db_datastore",
+#             "authorizedRoles",
+#         ]
+#         for config_item in config_extras:
+#             if config_item in config:
+#                 del config[config_item]
+#             if config_item in config["map"]:
+#                 del config["map"][config_item]
+#         return json.dumps(config)
+#     else:
+#         return conf
 
 
 # MAPS DOWNLOAD #
@@ -445,141 +445,141 @@ def map_download(request, mapid, template="maps/map_download.html"):
     )
 
 
-def map_wmc(request, mapid, template="maps/wmc.xml"):
-    """Serialize an OGC Web Map Context Document (WMC) 1.1"""
-    try:
-        map_obj = _resolve_map(request, mapid, "base.view_resourcebase", _PERMISSION_MSG_VIEW)
-    except PermissionDenied:
-        return HttpResponse(MSG_NOT_ALLOWED, status=403)
-    except Exception:
-        raise Http404(MSG_NOT_FOUND)
-    if not map_obj:
-        raise Http404(MSG_NOT_FOUND)
+# def map_wmc(request, mapid, template="maps/wmc.xml"):
+#     """Serialize an OGC Web Map Context Document (WMC) 1.1"""
+#     try:
+#         map_obj = _resolve_map(request, mapid, "base.view_resourcebase", _PERMISSION_MSG_VIEW)
+#     except PermissionDenied:
+#         return HttpResponse(MSG_NOT_ALLOWED, status=403)
+#     except Exception:
+#         raise Http404(MSG_NOT_FOUND)
+#     if not map_obj:
+#         raise Http404(MSG_NOT_FOUND)
 
-    site_url = settings.SITEURL.rstrip("/") if settings.SITEURL.startswith("http") else settings.SITEURL
-    return render(
-        request,
-        template,
-        context={
-            "map": map_obj,
-            "maplayers": map_obj.maplayers.all(),
-            "siteurl": site_url,
-        },
-        content_type="text/xml",
-    )
-
-
-@deprecated(version="2.10.1", reason="APIs have been changed on geospatial service")
-def map_wms(request, mapid):
-    """
-    Publish local map layers as group layer in local OWS.
-
-    /maps/:id/wms
-
-    GET: return endpoint information for group layer,
-    PUT: update existing or create new group layer.
-    """
-    try:
-        map_obj = _resolve_map(request, mapid, "base.view_resourcebase", _PERMISSION_MSG_VIEW)
-    except PermissionDenied:
-        return HttpResponse(MSG_NOT_ALLOWED, status=403)
-    except Exception:
-        raise Http404(MSG_NOT_FOUND)
-    if not map_obj:
-        raise Http404(MSG_NOT_FOUND)
-
-    if request.method == "PUT":
-        try:
-            layerGroupName = map_obj.publish_dataset_group()
-            response = dict(
-                layerGroupName=layerGroupName,
-                ows=getattr(ogc_server_settings, "ows", ""),
-            )
-            register_event(request, EventType.EVENT_PUBLISH, map_obj)
-            return HttpResponse(json.dumps(response), content_type="application/json")
-        except Exception:
-            return HttpResponseServerError()
-
-    if request.method == "GET":
-        response = dict(
-            layerGroupName=getattr(map_obj.dataset_group, "name", ""),
-            ows=getattr(ogc_server_settings, "ows", ""),
-        )
-        return HttpResponse(json.dumps(response), content_type="application/json")
-
-    return HttpResponseNotAllowed(["PUT", "GET"])
+#     site_url = settings.SITEURL.rstrip("/") if settings.SITEURL.startswith("http") else settings.SITEURL
+#     return render(
+#         request,
+#         template,
+#         context={
+#             "map": map_obj,
+#             "maplayers": map_obj.maplayers.all(),
+#             "siteurl": site_url,
+#         },
+#         content_type="text/xml",
+#     )
 
 
-def mapdataset_attributes(request, layername):
-    # Return custom layer attribute labels/order in JSON format
-    layer = Dataset.objects.get(alternate=layername)
-    return HttpResponse(
-        json.dumps(
-            layer.attribute_config()),
-        content_type="application/json")
+# @deprecated(version="2.10.1", reason="APIs have been changed on geospatial service")
+# def map_wms(request, mapid):
+#     """
+#     Publish local map layers as group layer in local OWS.
+
+#     /maps/:id/wms
+
+#     GET: return endpoint information for group layer,
+#     PUT: update existing or create new group layer.
+#     """
+#     try:
+#         map_obj = _resolve_map(request, mapid, "base.view_resourcebase", _PERMISSION_MSG_VIEW)
+#     except PermissionDenied:
+#         return HttpResponse(MSG_NOT_ALLOWED, status=403)
+#     except Exception:
+#         raise Http404(MSG_NOT_FOUND)
+#     if not map_obj:
+#         raise Http404(MSG_NOT_FOUND)
+
+#     if request.method == "PUT":
+#         try:
+#             layerGroupName = map_obj.publish_dataset_group()
+#             response = dict(
+#                 layerGroupName=layerGroupName,
+#                 ows=getattr(ogc_server_settings, "ows", ""),
+#             )
+#             register_event(request, EventType.EVENT_PUBLISH, map_obj)
+#             return HttpResponse(json.dumps(response), content_type="application/json")
+#         except Exception:
+#             return HttpResponseServerError()
+
+#     if request.method == "GET":
+#         response = dict(
+#             layerGroupName=getattr(map_obj.dataset_group, "name", ""),
+#             ows=getattr(ogc_server_settings, "ows", ""),
+#         )
+#         return HttpResponse(json.dumps(response), content_type="application/json")
+
+#     return HttpResponseNotAllowed(["PUT", "GET"])
 
 
-def get_suffix_if_custom(map):
-    if map.use_custom_template:
-        if map.featuredurl:
-            return map.featuredurl
-        elif map.urlsuffix:
-            return map.urlsuffix
-        else:
-            return None
-    else:
-        return None
+# def mapdataset_attributes(request, layername):
+#     # Return custom layer attribute labels/order in JSON format
+#     layer = Dataset.objects.get(alternate=layername)
+#     return HttpResponse(
+#         json.dumps(
+#             layer.attribute_config()),
+#         content_type="application/json")
 
 
-def ajax_url_lookup(request):
-    if request.method != 'POST':
-        return HttpResponse(
-            content='ajax user lookup requires HTTP POST',
-            status=405,
-            content_type='text/plain'
-        )
-    elif 'query' not in request.POST:
-        return HttpResponse(
-            content='use a field named "query" to specify a prefix to filter urls',
-            content_type='text/plain')
-    if request.POST['query'] != '':
-        maps = Map.objects.filter(urlsuffix__startswith=request.POST['query'])
-        if request.POST['mapid'] != '':
-            maps = maps.exclude(id=request.POST['mapid'])
-        json_dict = {
-            'urls': [({'url': m.urlsuffix}) for m in maps],
-            'count': maps.count(),
-        }
-    else:
-        json_dict = {
-            'urls': [],
-            'count': 0,
-        }
-    return HttpResponse(
-        content=json.dumps(json_dict),
-        content_type='text/plain'
-    )
+# def get_suffix_if_custom(map):
+#     if map.use_custom_template:
+#         if map.featuredurl:
+#             return map.featuredurl
+#         elif map.urlsuffix:
+#             return map.urlsuffix
+#         else:
+#             return None
+#     else:
+#         return None
 
 
-def map_metadata_detail(request, mapid, template="maps/map_metadata_detail.html"):
-    try:
-        map_obj = _resolve_map(request, mapid, "view_resourcebase")
-    except PermissionDenied:
-        return HttpResponse(MSG_NOT_ALLOWED, status=403)
-    except Exception:
-        raise Http404(MSG_NOT_FOUND)
-    if not map_obj:
-        raise Http404(MSG_NOT_FOUND)
+# def ajax_url_lookup(request):
+#     if request.method != 'POST':
+#         return HttpResponse(
+#             content='ajax user lookup requires HTTP POST',
+#             status=405,
+#             content_type='text/plain'
+#         )
+#     elif 'query' not in request.POST:
+#         return HttpResponse(
+#             content='use a field named "query" to specify a prefix to filter urls',
+#             content_type='text/plain')
+#     if request.POST['query'] != '':
+#         maps = Map.objects.filter(urlsuffix__startswith=request.POST['query'])
+#         if request.POST['mapid'] != '':
+#             maps = maps.exclude(id=request.POST['mapid'])
+#         json_dict = {
+#             'urls': [({'url': m.urlsuffix}) for m in maps],
+#             'count': maps.count(),
+#         }
+#     else:
+#         json_dict = {
+#             'urls': [],
+#             'count': 0,
+#         }
+#     return HttpResponse(
+#         content=json.dumps(json_dict),
+#         content_type='text/plain'
+#     )
 
-    group = None
-    if map_obj.group:
-        try:
-            group = GroupProfile.objects.get(slug=map_obj.group.name)
-        except GroupProfile.DoesNotExist:
-            group = None
-    site_url = settings.SITEURL.rstrip("/") if settings.SITEURL.startswith("http") else settings.SITEURL
-    register_event(request, EventType.EVENT_VIEW_METADATA, map_obj)
-    return render(request, template, context={"resource": map_obj, "group": group, "SITEURL": site_url})
+
+# def map_metadata_detail(request, mapid, template="maps/map_metadata_detail.html"):
+#     try:
+#         map_obj = _resolve_map(request, mapid, "view_resourcebase")
+#     except PermissionDenied:
+#         return HttpResponse(MSG_NOT_ALLOWED, status=403)
+#     except Exception:
+#         raise Http404(MSG_NOT_FOUND)
+#     if not map_obj:
+#         raise Http404(MSG_NOT_FOUND)
+
+#     group = None
+#     if map_obj.group:
+#         try:
+#             group = GroupProfile.objects.get(slug=map_obj.group.name)
+#         except GroupProfile.DoesNotExist:
+#             group = None
+#     site_url = settings.SITEURL.rstrip("/") if settings.SITEURL.startswith("http") else settings.SITEURL
+#     register_event(request, EventType.EVENT_VIEW_METADATA, map_obj)
+#     return render(request, template, context={"resource": map_obj, "group": group, "SITEURL": site_url})
 
 
 @login_required
