@@ -43,6 +43,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.contrib.contenttypes.models import ContentType
 
+from geonode.base.utils import ManageResourceOwnerPermissions
 from geonode.thumbs.thumbnails import _generate_thumbnail_name
 from geonode.documents.tasks import create_document_thumbnail
 from geonode.thumbs import utils as thumb_utils
@@ -771,6 +772,9 @@ class ResourceManager(ResourceManagerInterface):
                             uuid, instance=_resource, owner=owner, permissions=_perm_spec, created=created):
                         # This might not be a severe error. E.g. for datasets outside of local GeoServer
                         logger.error(Exception("Could not complete concrete manager operation successfully!"))
+
+                owner_perm_manager = ManageResourceOwnerPermissions(_resource)
+                owner_perm_manager.set_owner_permissions_according_to_workflow()
                 _resource.set_processing_state(enumerations.STATE_PROCESSED)
                 return True
             except Exception as e:
@@ -928,6 +932,21 @@ class ResourceManager(ResourceManagerInterface):
                 if _resource.is_published:
                     prev_perms = perm_spec['groups'].get(anonymous_group, []) if isinstance(perm_spec['groups'], dict) else []
                     perm_spec['groups'][anonymous_group] = list(set(prev_perms + view_perms))
+
+                if settings.ADMIN_MODERATE_UPLOADS and settings.RESOURCE_PUBLISHING:
+
+                    if _resource.is_approved or _resource.is_published:
+                        # Assign view and download permissions to owner and other users with edit permissions
+                        new_perms = {"users": {}, "groups": {}}
+                        for user, perms in perm_spec["users"].items():
+                            if user in group_managers or user.is_superuser:
+                                new_perms["users"][user] = perms
+                            else:
+                                new_perms["users"][user] = [perm for perm in perms if perm not in ADMIN_PERMISSIONS]
+                        for group, perms in perm_spec["groups"].items():
+                            new_perms["groups"][group] = [perm for perm in perms if perm not in ADMIN_PERMISSIONS]
+
+                        perm_spec = new_perms
 
             return self._concrete_resource_manager.get_workflow_permissions(_resource.uuid, instance=_resource, permissions=perm_spec)
 
