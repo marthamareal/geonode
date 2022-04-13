@@ -32,6 +32,7 @@ from django.contrib.sites.models import Site
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import AbstractUser, Permission, UserManager
 from django.contrib.auth.signals import user_logged_in, user_logged_out
+from django.core.validators import validate_email
 
 from taggit.managers import TaggableManager
 
@@ -43,7 +44,7 @@ from geonode.security.permissions import PERMISSIONS, READ_ONLY_AFFECTED_PERMISS
 from allauth.account.signals import user_signed_up
 from allauth.socialaccount.signals import social_account_added
 
-from .utils import format_address
+from .utils import format_address, unique_email_validator
 from .signals import (
     do_login,
     do_logout,
@@ -64,6 +65,10 @@ class ProfileUserManager(UserManager):
 class Profile(AbstractUser):
     """Fully featured Geonode user"""
 
+    email = models.EmailField(
+        _('email address'),
+        blank=True,
+        validators=[validate_email, unique_email_validator])
     organization = models.CharField(
         _('Organization Name'),
         max_length=255,

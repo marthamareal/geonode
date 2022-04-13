@@ -30,8 +30,11 @@
         {% if field.name not in PROFILE_EDIT_EXCLUDE_FIELD  %}
         <div id="div_{{ field.auto_id }}" class="form-group">
             <label for="{{ field.auto_id }}" class="control-label">{{ field.label }}</label>
-            <div class="">
+            <div class="{% if field.errors %} has-error {% endif %}">
                 {% render_field field class="form-control" %}
+                {% if field.errors %}
+                  {{ field.errors }}
+                {% endif %}
             </div>
         </div>
         {% endif %}

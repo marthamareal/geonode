@@ -18,9 +18,14 @@
 #########################################################################
 
 from django.contrib.auth import get_user_model
-
+from django.core.exceptions import ValidationError
 
 from geonode import GeoNodeException
+
+
+def unique_email_validator(email):
+    if email != "" and get_user_model().objects.filter(email=email).exists():
+        raise ValidationError('A user with that email already exists')
 
 
 def get_default_user():
